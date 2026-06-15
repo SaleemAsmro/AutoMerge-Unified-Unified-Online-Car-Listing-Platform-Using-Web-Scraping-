@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — AutoMerge</title>
+  <link rel="stylesheet" href="../styles/style.css">
+  <style>
+    body { background: var(--off-white); min-height: 100vh; }
+
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Left panel */
+    .auth-visual {
+      position: relative;
+      overflow: hidden;
+      background: var(--black);
+    }
+    .auth-visual img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.35;
+    }
+    .auth-visual-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 52px;
+    }
+    .auth-visual-logo {
+      position: absolute;
+      top: 40px; left: 52px;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.03em;
+    }
+    .auth-visual-logo span { color: var(--accent); }
+    .auth-visual-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .auth-visual-sub {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.45);
+    }
+
+    /* Right panel */
+    .auth-form-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 52px 64px;
+      background: var(--white);
+    }
+
+    .auth-form-inner {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .auth-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--black);
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .auth-subtitle {
+      font-size: 0.88rem;
+      color: var(--gray-400);
+      margin-bottom: 36px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .auth-divider {
+      text-align: center;
+      margin: 24px 0;
+      position: relative;
+      color: var(--gray-300);
+      font-size: 0.8rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%; width: calc(50% - 28px);
+      height: 1px;
+      background: var(--border);
+    }
+    .auth-divider::before { left: 0; }
+    .auth-divider::after { right: 0; }
+
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 0.9rem;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .auth-footer-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      margin-top: 24px;
+    }
+    .auth-footer-text a {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .auth-footer-text a:hover { text-decoration: underline; }
+
+    .password-wrap { position: relative; }
+    .password-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      color: var(--gray-400);
+      padding: 4px;
+    }
+    .password-toggle:hover { color: var(--black); }
+
+    @media (max-width: 900px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .auth-form-panel { padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+<div class="auth-page">
+  <!-- Visual -->
+  <div class="auth-visual">
+    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80" alt="">
+    <div class="auth-visual-content">
+      <a class="auth-visual-logo" href="../index.html">Auto<span>Merge</span></a>
+      <h2 class="auth-visual-title">Join the<br>Marketplace</h2>
+      <p class="auth-visual-sub">List your car, browse thousands of listings, and connect with buyers across Iraq.</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Fill in your details to get started</p>
+
+      <form id="registerForm" onsubmit="return false;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="firstName" placeholder="Ali" autocomplete="given-name">
+            <p class="form-error" id="errFirstName">Required</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="lastName" placeholder="Hassan" autocomplete="family-name">
+            <p class="form-error" id="errLastName">Required</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Username <span class="required">*</span></label>
+          <input type="text" class="form-input" id="username" placeholder="ali_hassan" autocomplete="username">
+          <p class="form-error" id="errUsername">Required</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address <span class="required">*</span></label>
+          <input type="email" class="form-input" id="email" placeholder="ali@example.com" autocomplete="email">
+          <p class="form-error" id="errEmail">Enter a valid email</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password <span class="required">*</span></label>
+          <div class="password-wrap">
+            <input type="password" class="form-input" id="password" placeholder="At least 6 characters" autocomplete="new-password">
+            <button type="button" class="password-toggle" onclick="togglePwd('password', this)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="form-error" id="errPassword">Minimum 6 characters</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password <span class="required">*</span></label>
+          <div class="password-wrap">
+            <input type="password" class="form-input" id="confirmPassword" placeholder="Repeat password" autocomplete="new-password">
+            <button type="button" class="password-toggle" onclick="togglePwd('confirmPassword', this)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="form-error" id="errConfirm">Passwords do not match</p>
+        </div>
+
+        <button type="submit" class="btn-primary auth-submit" onclick="handleRegister()">
+          Create Account
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <p class="auth-footer-text">Already have an account? <a href="signin.html">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="toastMount"></div>
+<script src="../behavior/utils.js"></script>
+<script>
+  document.getElementById('toastMount').innerHTML = renderToastContainer();
+
+  function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.querySelector('svg').innerHTML = show
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+
+  function setError(id, msg, show) {
+    const el = document.getElementById(id);
+    if (msg) el.textContent = msg;
+    el.classList.toggle('show', show);
+    const input = el.previousElementSibling?.tagName === 'INPUT'
+      ? el.previousElementSibling
+      : el.previousElementSibling?.querySelector('input');
+    if (input) input.classList.toggle('error', show);
+  }
+
+  function handleRegister() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    let valid = true;
+
+    setError('errFirstName', 'First name is required', !firstName);
+    if (!firstName) valid = false;
+
+    setError('errLastName', 'Last name is required', !lastName);
+    if (!lastName) valid = false;
+
+    setError('errUsername', 'Username is required', !username);
+    if (!username) valid = false;
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    setError('errEmail', 'Enter a valid email address', !emailOk);
+    if (!emailOk) valid = false;
+
+    setError('errPassword', 'Minimum 6 characters', password.length < 6);
+    if (password.length < 6) valid = false;
+
+    setError('errConfirm', 'Passwords do not match', password !== confirm);
+    if (password !== confirm) valid = false;
+
+    if (!valid) return;
+
+    const result = registerUser(username, email, password);
+    if (!result.ok) {
+      showToast(result.msg, 'error');
+      return;
+    }
+
+    // Store extra info
+    const users = getUsers();
+    const u = users.find(u => u.username === username);
+    if (u) { u.firstName = firstName; u.lastName = lastName; localStorage.setItem('am_users', JSON.stringify(users)); }
+
+    showToast('Account created! Redirecting...', 'success');
+    setTimeout(() => window.location.href = 'signin.html', 1400);
+  }
+</script>
+</body>
+</html>

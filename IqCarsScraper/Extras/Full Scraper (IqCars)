@@ -1,0 +1,199 @@
+# library imports for web browser control, element location, an exceptions library which is used for try except blocks, time pauses, and regular expressions respectively
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from time import sleep
+# when running the script, a stale error would come and crash the script, with the help of AI i figured out how to solve it
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, ElementNotInteractableException
+import re
+import json
+# this time import is just to see how long scraping took
+import time
+
+
+start_time = time.time()
+
+
+def iq_cars_popup():
+    try:
+        iq_cars_popup_close = driver.find_element(By.XPATH, '//h2[text()="Use iQ Cars App"]/following-sibling::button')
+        iq_cars_popup_close.click()
+    except (NoSuchElementException, ElementNotInteractableException):
+        return
+
+
+# chrome setup options
+options = webdriver.ChromeOptions()
+options.add_argument('--start-maximized')
+options.add_experimental_option('detach', True)
+
+driver = webdriver.Chrome(options=options)
+actions = ActionChains(driver)
+
+# list to store all car dictionaries
+all_cars = []
+
+# open the website
+driver.get('https://www.iqcars.net/')
+# this code block first waits for every
+# thing to load with the help of the sleep statement.
+# the website always asks for location, so we want to click "ask me later". issue is:
+# the default language of the website is in arabic, so we have to use the text to click the button
+sleep(10)
+location_skip = driver.find_element(By.XPATH, '//div/button[text()="التخطي"]')
+location_skip.click()
+
+# we want to change the language of the website so it doesn't affect our scraping
+# this is a drop down menu of multiple languages that has to be clicked to change language
+language_change = driver.find_element(By.XPATH, '//p[text()="کوردی"]')
+language_change.click()
+
+# here we choose the english language button to change to
+change_to_english = driver.find_element(By.XPATH, '//li[text()="English"]')
+change_to_english.click()
+
+# wait for the element to load after changing languages and then click on show XYZ cars button to display all available cars
+# Note: the . in the parenthesis is used because the text is split into three parts, "show", the number of cars => "XYZ", and "cars", because they are 3 text fields within the same element
+# the . before the text words is used to basically look inside the p tag and check if any of the
+# text fields include the texts selected. The number was not chosen due to it being subject to change
+sleep(1)
+show_all_cars = driver.find_element(By.XPATH, "//p[contains(., 'Show') and contains(., 'cars')]")
+show_all_cars.click()
+
+
+# this try covering the entire code is so that if somehting happens, the data can be saved to the json file
+try:
+    # this while loop is for pagination
+    while True:
+        # the website takes a while to load the car pages, so we put another sleep to halt the automation until the elements are ready to be scraped
+        sleep(10)
+        car_cards = driver.find_elements(By.CSS_SELECTOR, "div.css-19egsyp")
+
+        for element in car_cards:
+
+            iq_cars_popup()
+            try:
+                # IQ cars has advertisement cards that arent needed
+                element.find_element(By.XPATH, './/img[@alt="advertisement"]')
+                print("ad skipped\n")
+                continue
+            #     with the help of AI, stale exceptions can be caught here so the program doesnt crash
+            except StaleElementReferenceException:
+                print("stale element skipped")
+                continue
+            except NoSuchElementException:
+                try:
+                    # if it isnt an ad do the following
+
+                    # fetch the thumbnail
+                    try:
+                        car_img = element.find_element(By.XPATH, './/div[contains(@class,"css-ohwg9z")]/img').get_attribute('src')
+                    except NoSuchElementException:
+                        car_img = None
+
+                    # fetch the link for the car card
+                    car_link = element.find_element(By.XPATH, './/a[@name="car"]').get_attribute('href')
+
+                    # fetch the car name
+                    # .// the . here means search inside the element
+                    car_name = element.find_element(By.XPATH, './/p[contains(@class,"css-1llnun9")]').text.strip()
+
+                    year = None
+                    mileage_value = None
+                    mileage_unit = None
+                    trim = None
+
+                    info_spans = element.find_elements(By.XPATH, './/span[contains(@class,"MuiTypography-title1")]')
+                    for span in info_spans:
+                        text = span.text.strip()
+
+                        # year \d{4} means select only 4 digit text, meaning 20xx
+                        if re.fullmatch(r"\d{4}", text):
+                            year = text
+
+                        # mileage normalization for km and miles
+                        elif "km" in text.lower() or "mile" in text.lower():
+                            # [\d,]+ meaning any digits and commas
+                            number = re.search(r"[\d,]+", text)
+                            if number:
+                                mileage_value = number.group().replace(",", "")
+                            mileage_unit = "km" if "km" in text.lower() else "miles"
+
+                    # trim
+                    try:
+                        trim = element.find_element(By.XPATH,
+                                                    './/div[contains(@class,"css-7u1krz")]/div[3]/span[contains(@class, "css-128wzst")]').text
+                    except NoSuchElementException:
+                        trim = None
+
+                    # location
+                    location = element.find_element(By.XPATH, './/img[@alt="location"]/following-sibling::span').text
+
+                    # price
+                    try:
+                        element.find_element(By.XPATH, './/img[@alt="iraq"]')
+                        currency = "IQD"
+                        # font price means 5 in 5,000,000 for example
+                        main = element.find_element(By.XPATH, './/span[@class="FontPrice"]').text.strip()
+                        # last digits are the zeroes in 5,000,000 for example
+                        last_digits = element.find_element(By.XPATH, './/span[@class="FontPriceLastDigits"]').text.strip()
+                        price = (main + last_digits).replace(",", "")
+                    except NoSuchElementException:
+                        try:
+                            price_span = element.find_element(By.XPATH, './/span[contains(@class,"FontPrice")]')
+                            currency = "USD"
+                            price = price_span.text.strip().replace("$", "").replace(",", "").strip()
+                        except NoSuchElementException:
+                            currency = None
+                            price = None
+
+                    # build the dictionary for this car and append to the list
+                    # this dictionary was made with AI because i was too lazy to do this mundane task
+                    car_data = {
+                        "car_link": car_link,
+                        "car_image": car_img,
+                        "car_name": car_name,
+                        "year": year,
+                        "mileage_value": mileage_value,
+                        "mileage_unit": mileage_unit,
+                        "trim": trim,
+                        "location": location,
+                        "price": price,
+                        "currency": currency
+                    }
+
+                    all_cars.append(car_data)
+                    print(car_data)
+
+                # with the help of AI, putting a stale exception here can also help not crash the script
+                except (StaleElementReferenceException, NoSuchElementException):
+                    print("element skipped")
+                    continue
+
+        # after scraping the page, try to go to next page
+        try:
+            next_button = driver.find_element(By.XPATH,'//li[contains(@class,"ant-pagination-next") and @aria-disabled="false"]/button')
+            next_button.click()
+            sleep(3)
+        except NoSuchElementException:
+            sleep (5)
+            # sometimes the scraping script cannot find the next button for whatever reason, so we retry it
+            try:
+                next_button = driver.find_element(By.XPATH,
+                                                  '//li[contains(@class,"ant-pagination-next") and @aria-disabled="false"]/button')
+                next_button.click()
+            except NoSuchElementException:
+                print("No more pages")
+                break
+finally:
+    # save all scraped data to a json file
+    # indent=4 makes the file readable
+    with open("cars.json", "w", encoding="utf-8") as f:
+        json.dump(all_cars, f, indent=4)
+
+    print(f"Saved {len(all_cars)} cars to cars.json")
+
+    # the following section was generated with AI
+    end_time = time.time()
+    elapsed = end_time - start_time
+    print(f"Script ran for {elapsed // 60:.0f} minutes and {elapsed % 60:.0f} seconds")

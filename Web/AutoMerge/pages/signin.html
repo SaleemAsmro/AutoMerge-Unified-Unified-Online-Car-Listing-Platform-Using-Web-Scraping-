@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — AutoMerge</title>
+  <link rel="stylesheet" href="../styles/style.css">
+  <style>
+    body { background: var(--off-white); min-height: 100vh; }
+
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .auth-visual {
+      position: relative;
+      overflow: hidden;
+      background: var(--black);
+    }
+    .auth-visual img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.35;
+    }
+    .auth-visual-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 52px;
+    }
+    .auth-visual-logo {
+      position: absolute;
+      top: 40px; left: 52px;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.03em;
+    }
+    .auth-visual-logo span { color: var(--accent); }
+    .auth-visual-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .auth-visual-sub {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .auth-form-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 52px 64px;
+      background: var(--white);
+    }
+
+    .auth-form-inner {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--black);
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .auth-subtitle {
+      font-size: 0.88rem;
+      color: var(--gray-400);
+      margin-bottom: 36px;
+    }
+
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 0.9rem;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .auth-footer-text {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      margin-top: 24px;
+    }
+    .auth-footer-text a {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .auth-footer-text a:hover { text-decoration: underline; }
+
+    .forgot-link {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      float: right;
+      margin-top: -2px;
+      cursor: pointer;
+    }
+    .forgot-link:hover { color: var(--gray-700); }
+
+    .password-wrap { position: relative; }
+    .password-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      color: var(--gray-400);
+      padding: 4px;
+    }
+    .password-toggle:hover { color: var(--black); }
+
+    @media (max-width: 900px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+      .auth-form-panel { padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-visual">
+    <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1200&q=80" alt="">
+    <div class="auth-visual-content">
+      <a class="auth-visual-logo" href="../index.html">Auto<span>Merge</span></a>
+      <h2 class="auth-visual-title">Welcome<br>Back</h2>
+      <p class="auth-visual-sub">Sign in to manage your listings and access seller tools.</p>
+    </div>
+  </div>
+
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+      <h1 class="auth-title">Sign In</h1>
+      <p class="auth-subtitle">Enter your email or username to continue</p>
+
+      <form id="signinForm" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label">Email or Username <span class="required">*</span></label>
+          <input type="text" class="form-input" id="loginId" placeholder="ali@example.com" autocomplete="username">
+          <p class="form-error" id="errLoginId">This field is required</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Password <span class="required">*</span></span>
+            <span class="forgot-link" onclick="showToast('Password reset is not available in demo mode', 'info')">Forgot password?</span>
+          </label>
+          <div class="password-wrap">
+            <input type="password" class="form-input" id="loginPassword" placeholder="Your password" autocomplete="current-password">
+            <button type="button" class="password-toggle" onclick="togglePwd(this)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="form-error" id="errLoginPassword">Password is required</p>
+        </div>
+
+        <div id="errGeneral" style="display:none;background:rgba(230,51,41,0.07);border:1px solid rgba(230,51,41,0.25);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.83rem;color:var(--accent);margin-bottom:14px;"></div>
+
+        <button type="submit" class="btn-primary auth-submit" onclick="handleSignin()">
+          Sign In
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <p class="auth-footer-text">Don't have an account? <a href="register.html">Register</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="toastMount"></div>
+<script src="../behavior/utils.js"></script>
+<script>
+  document.getElementById('toastMount').innerHTML = renderToastContainer();
+
+  // If already logged in, redirect
+  if (getSession()) window.location.href = 'seller.html';
+
+  function togglePwd(btn) {
+    const inp = document.getElementById('loginPassword');
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.querySelector('svg').innerHTML = show
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+
+  function handleSignin() {
+    const id = document.getElementById('loginId').value.trim();
+    const pwd = document.getElementById('loginPassword').value;
+    const errGeneral = document.getElementById('errGeneral');
+    errGeneral.style.display = 'none';
+
+    let valid = true;
+    if (!id) {
+      document.getElementById('errLoginId').classList.add('show');
+      document.getElementById('loginId').classList.add('error');
+      valid = false;
+    } else {
+      document.getElementById('errLoginId').classList.remove('show');
+      document.getElementById('loginId').classList.remove('error');
+    }
+    if (!pwd) {
+      document.getElementById('errLoginPassword').classList.add('show');
+      document.getElementById('loginPassword').classList.add('error');
+      valid = false;
+    } else {
+      document.getElementById('errLoginPassword').classList.remove('show');
+      document.getElementById('loginPassword').classList.remove('error');
+    }
+    if (!valid) return;
+
+    const result = loginUser(id, pwd);
+    if (!result.ok) {
+      errGeneral.textContent = result.msg;
+      errGeneral.style.display = 'block';
+      return;
+    }
+
+    showToast('Welcome back, ' + result.user.username + '!', 'success');
+    setTimeout(() => window.location.href = 'seller.html', 1200);
+  }
+
+  // Allow Enter key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSignin();
+  });
+</script>
+</body>
+</html>

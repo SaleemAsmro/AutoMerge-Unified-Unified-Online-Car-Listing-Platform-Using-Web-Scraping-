@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Cars — AutoMerge</title>
+  <link rel="stylesheet" href="../styles/style.css">
+  <style>
+    .browse-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+      padding-top: var(--nav-h);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 32px 24px;
+      position: sticky;
+      top: var(--nav-h);
+      height: calc(100vh - var(--nav-h));
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin-bottom: 20px;
+    }
+
+    .sidebar-section { margin-bottom: 28px; }
+    .sidebar-section-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 10px;
+    }
+
+    .sidebar-search-wrap {
+      position: relative;
+      margin-bottom: 28px;
+    }
+    .sidebar-search-wrap svg {
+      position: absolute;
+      left: 11px; top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      stroke: var(--gray-400);
+    }
+    .sidebar-search {
+      width: 100%;
+      padding: 10px 12px 10px 34px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      transition: border-color var(--transition);
+    }
+    .sidebar-search:focus { border-color: var(--accent); outline: none; }
+
+    .clear-filters-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--gray-100);
+      color: var(--gray-500);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: all var(--transition);
+      margin-top: 8px;
+    }
+    .clear-filters-btn:hover { background: var(--gray-200); color: var(--black); }
+
+    /* ── MAIN ── */
+    .browse-main {
+      padding: 32px 40px 60px;
+      background: var(--off-white);
+    }
+
+    .browse-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .browse-count {
+      font-size: 0.88rem;
+      color: var(--gray-500);
+    }
+    .browse-count strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--black);
+    }
+
+    .browse-sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sort-label {
+      font-size: 0.8rem;
+      color: var(--gray-400);
+      white-space: nowrap;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    #sortSelect { width: 180px; }
+
+    .cars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 20px;
+    }
+
+    .no-results {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .no-results-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    .no-results h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .no-results p { color: var(--gray-400); font-size: 0.9rem; }
+
+    /* Source filter pills */
+    .source-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .source-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all var(--transition);
+      background: var(--white);
+    }
+    .source-pill:hover { border-color: var(--gray-300); }
+    .source-pill.active { border-color: var(--accent); background: rgba(230,51,41,0.04); }
+    .source-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .source-dot.carsiq { background: #e63329; }
+    .source-dot.iqcars { background: #1a5dad; }
+    .source-dot.kurdshopping { background: #228b22; }
+    .source-dot.user { background: #8b4513; }
+    .source-pill-count {
+      margin-left: auto;
+      font-size: 0.72rem;
+      color: var(--gray-400);
+      font-family: var(--font-display);
+    }
+
+    @media (max-width: 900px) {
+      .browse-layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+      }
+      .browse-main { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="../index.html">Auto<span>Merge</span></a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="browse.html" class="active">Browse Cars</a></li>
+  </ul>
+  <span class="nav-lang">EN</span>
+  <a href="register.html" class="nav-btn">Login / Register</a>
+</nav>
+
+<div class="browse-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <p class="sidebar-title">Filters</p>
+
+    <div class="sidebar-search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" class="sidebar-search" id="searchInput" placeholder="Search cars...">
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Source</p>
+      <div class="source-pills" id="sourcePills">
+        <div class="source-pill" data-src="all">
+          <span class="source-dot" style="background:var(--gray-300)"></span>
+          All Sources
+          <span class="source-pill-count" id="countAll">—</span>
+        </div>
+        <div class="source-pill" data-src="Cars.iq">
+          <span class="source-dot carsiq"></span>
+          Cars.IQ
+          <span class="source-pill-count" id="countCarsiq">—</span>
+        </div>
+        <div class="source-pill" data-src="IQ Cars">
+          <span class="source-dot iqcars"></span>
+          IQCars
+          <span class="source-pill-count" id="countIqcars">—</span>
+        </div>
+        <div class="source-pill" data-src="KurdShopping">
+          <span class="source-dot kurdshopping"></span>
+          KurdShopping
+          <span class="source-pill-count" id="countKurdshopping">—</span>
+        </div>
+        <div class="source-pill" data-src="User Listed">
+          <span class="source-dot user"></span>
+          User Listed
+          <span class="source-pill-count" id="countUser">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Brand</p>
+      <select class="filter-select" id="filterBrand"></select>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Trim</p>
+      <select class="filter-select" id="filterTrim"></select>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Location</p>
+      <select class="filter-select" id="filterLocation"></select>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Year</p>
+      <select class="filter-select" id="filterYear"></select>
+    </div>
+    <div class="sidebar-section">
+      <p class="sidebar-section-label">Currency</p>
+      <select class="filter-select" id="filterCurrency"></select>
+    </div>
+
+    <button class="clear-filters-btn" onclick="clearFilters()">Clear All Filters</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="browse-main">
+    <div class="browse-header">
+      <p class="browse-count" id="browseCount">Loading...</p>
+      <div class="browse-sort-wrap">
+        <span class="sort-label">Sort by</span>
+        <select class="filter-select" id="sortSelect" onchange="applyFilters()">
+          <option value="">Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="year-desc">Newest First</option>
+          <option value="year-asc">Oldest First</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cars-grid" id="carsGrid">
+      <div class="page-loader" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+  </main>
+</div>
+
+<!-- FOOTER -->
+<div id="footerMount"></div>
+<!-- COMPARE -->
+<div id="compareMount"></div>
+<div id="toastMount"></div>
+
+<script src="../behavior/utils.js"></script>
+<script>
+  document.getElementById('footerMount').innerHTML = renderFooter();
+  document.getElementById('compareMount').innerHTML = renderCompareBar();
+  document.getElementById('toastMount').innerHTML = renderToastContainer();
+  initNavbar();
+
+  const ITEMS_PER_PAGE = 24;
+  let currentPage = 1;
+  let filteredCars = [];
+  let activeSource = 'all';
+
+  async function init() {
+    const cars = await loadAllCars();
+    allCarsCache = cars;
+
+    // Source counts
+    document.getElementById('countAll').textContent = cars.length;
+    document.getElementById('countCarsiq').textContent = cars.filter(c => c.source === 'Cars.iq').length;
+    document.getElementById('countIqcars').textContent = cars.filter(c => c.source === 'IQ Cars').length;
+    document.getElementById('countKurdshopping').textContent = cars.filter(c => c.source === 'KurdShopping').length;
+    document.getElementById('countUser').textContent = cars.filter(c => getSourceClass(c.source) === 'user').length;
+
+    // Populate filters
+    const brands = [...new Set(cars.map(c => c.car_name.split(' ')[0]))].sort();
+    const locations = getUniqueValues(cars, 'location');
+    const years = [...new Set(cars.map(c => c.year))].sort((a,b) => b-a);
+    const currencies = getUniqueValues(cars, 'currency');
+
+    populateSelect('filterBrand', brands, 'All Brands');
+    populateSelect('filterTrim', [], 'All Trims');
+    populateSelect('filterLocation', locations, 'All Locations');
+    populateSelect('filterYear', years, 'All Years');
+    populateSelect('filterCurrency', currencies, 'Any Currency');
+
+    document.getElementById('filterBrand').addEventListener('change', function() {
+      const selectedBrand = this.value;
+      const filtered = selectedBrand
+        ? allCarsCache.filter(c => c.car_name.split(' ')[0] === selectedBrand)
+        : allCarsCache;
+      const trims = getUniqueValues(filtered, 'trim').filter(t => t && t !== 'null');
+      populateSelect('filterTrim', trims, 'All Trims');
+      document.getElementById('filterTrim').value = '';
+      applyFilters();
+    });
+
+    // Read URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('brand')) {
+      document.getElementById('filterBrand').value = params.get('brand');
+      // manually populate trims for this brand
+      const selectedBrand = params.get('brand');
+      const filtered = allCarsCache.filter(c => c.car_name.split(' ')[0] === selectedBrand);
+      const trims = getUniqueValues(filtered, 'trim').filter(t => t && t !== 'null');
+      populateSelect('filterTrim', trims, 'All Trims');
+      if (params.get('trim')) document.getElementById('filterTrim').value = params.get('trim');
+    }
+    if (params.get('location')) document.getElementById('filterLocation').value = params.get('location');
+    if (params.get('year')) document.getElementById('filterYear').value = params.get('year');
+    if (params.get('currency')) document.getElementById('filterCurrency').value = params.get('currency');
+
+    // Source pill events
+    document.querySelectorAll('.source-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.source-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        activeSource = pill.dataset.src;
+        currentPage = 1;
+        applyFilters();
+      });
+    });
+    document.querySelector('.source-pill[data-src="all"]').classList.add('active');
+
+    // Filter events
+    ['filterLocation','filterYear','filterCurrency','filterTrim'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => { currentPage = 1; applyFilters(); });
+    });
+    document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; applyFilters(); });
+
+    applyFilters();
+  }
+
+  function applyFilters() {
+    let cars = [...allCarsCache];
+
+    // Source filter
+    if (activeSource !== 'all') {
+      cars = cars.filter(c => c.source === activeSource);
+    }
+
+    const filters = {
+      brand: document.getElementById('filterBrand').value,
+      trim: document.getElementById('filterTrim').value,
+      location: document.getElementById('filterLocation').value,
+      year: document.getElementById('filterYear').value,
+      currency: document.getElementById('filterCurrency').value,
+      search: document.getElementById('searchInput').value,
+    };
+    cars = filterCars(cars, filters);
+
+    const sortVal = document.getElementById('sortSelect').value;
+    if (sortVal) cars = sortCars(cars, sortVal);
+
+    filteredCars = cars;
+    renderPage();
+  }
+
+  function renderPage() {
+    const total = filteredCars.length;
+    const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const pageCars = filteredCars.slice(start, start + ITEMS_PER_PAGE);
+
+    document.getElementById('browseCount').innerHTML =
+      `Showing <strong>${pageCars.length}</strong> of <strong>${total}</strong> listings`;
+
+    const grid = document.getElementById('carsGrid');
+    if (pageCars.length === 0) {
+      grid.innerHTML = `
+        <div class="no-results">
+          <div class="no-results-icon">🔍</div>
+          <h3>No cars found</h3>
+          <p>Try adjusting your filters or search terms</p>
+        </div>`;
+    } else {
+      grid.innerHTML = pageCars.map(c => buildCarCard(c)).join('');
+    }
+
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages) {
+    if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+
+    let html = '';
+    html += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>`;
+
+    const pages = getPagesToShow(currentPage, totalPages);
+    pages.forEach(p => {
+      if (p === '...') {
+        html += `<span class="page-btn" style="cursor:default;color:var(--gray-300)">…</span>`;
+      } else {
+        html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+      }
+    });
+
+    html += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>`;
+
+    document.getElementById('pagination').innerHTML = html;
+  }
+
+  function getPagesToShow(current, total) {
+    if (total <= 7) return Array.from({length: total}, (_,i) => i+1);
+    const pages = [1];
+    if (current > 3) pages.push('...');
+    for (let i = Math.max(3, current-1); i <= Math.min(total-1, current+1); i++) pages.push(i);
+    if (current < total - 2) pages.push('...');
+    pages.push(total);
+    return pages;
+  }
+
+  function goPage(n) {
+    const totalPages = Math.ceil(filteredCars.length / ITEMS_PER_PAGE);
+    if (n < 1 || n > totalPages) return;
+    currentPage = n;
+    renderPage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function clearFilters() {
+    document.getElementById('filterBrand').value = '';
+    document.getElementById('filterLocation').value = '';
+    document.getElementById('filterYear').value = '';
+    document.getElementById('filterCurrency').value = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('sortSelect').value = '';
+    document.querySelectorAll('.source-pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.source-pill[data-src="all"]').classList.add('active');
+    activeSource = 'all';
+    currentPage = 1;
+    applyFilters();
+  }
+
+  init();
+</script>
+</body>
+</html>
