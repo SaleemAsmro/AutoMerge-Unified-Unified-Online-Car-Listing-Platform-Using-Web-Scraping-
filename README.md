@@ -1,8 +1,12 @@
 # AutoMerge-Unified-Unified-Online-Car-Listing-Platform-Using-Web-Scraping-
 A central website that has scraped listings from other online car listing websites aggregated into one place for convenience and ease of use. This is a univeristy project made public for other people who may benefit from this.
 
+
+
 Hardware needed: 
 Computer + Internet connection
+
+
 
 Software needed:
 1- Python IDE (e.g Pycharm) + Selenium installation via terminal
@@ -10,6 +14,9 @@ Software needed:
 2- ChromeDriver 
 
 3- Any IDE that has live server for hosting a website. (e.g VS Code)
+
+
+
 
 
 Steps to use:
