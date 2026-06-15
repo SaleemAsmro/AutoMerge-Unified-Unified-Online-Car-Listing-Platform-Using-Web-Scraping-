@@ -31,6 +31,7 @@ Steps to use:
 4- Let the script do its thing
 
 (How to run the website)
+
 5- **IMPORTANT** Go to _Web/behavior/utils.js_ and change the paths of the JSON files found in _web/data/CarsIq.json_, _web/data/IQcars.json_, and _web/data/KurdShopping.json_ to where the files are actually located in your computer. 
 
 5- Open the folder _Web_ in your IDE.
