@@ -22,6 +22,7 @@ Software needed:
 Steps to use:
 
 (OPTIONAL) [since the json file already exists its optional]
+
 1- From the following folders: CarsIqScraper, IqCarsScraper, KurdShoppingScraper, locate the _main.py_ file
 
 2- In the terminal of your Python IDE, type _pip install selenium_ and press enter.
